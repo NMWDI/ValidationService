@@ -1,0 +1,12 @@
+dash==2.8.0
+plotly
+pandas
+dash_bootstrap_components
+dash_renderjson
+requests
+pyshp
+jsonschema
+#flask_caching
+pysta
+# celery
+# redis
