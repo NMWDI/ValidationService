@@ -99,12 +99,17 @@ DATASTREAM_SCHEMA = {
 #     return validate_locations(url)
 
 
-def validate_locations(url):
+def validate_locations(base_url, n=10):
     global LOCATION_SCHEMA
     if LOCATION_SCHEMA is None:
         resp = requests.get('https://raw.githubusercontent.com/NMWDI/VocabService/main/schemas/location.schema.json#')
         LOCATION_SCHEMA = resp.json()
-    return _validate(url, 'Locations?$top=10', LOCATION_SCHEMA)
+
+    url = 'Locations'
+    if n:
+        url = f'{url}?$top={n}'
+
+    return _validate(base_url, url, LOCATION_SCHEMA)
 
 
 def validate_things(url):

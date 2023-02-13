@@ -22,6 +22,7 @@ dash_app = Dash(
     external_stylesheets=[dbc.themes.BOOTSTRAP],
     title="NMWDI SensorThings Validation",
     # background_callback_manager=background_callback_manager,
+    requests_pathname_prefix='/app/'
 )
 
 # ============= EOF =============================================

@@ -1,11 +1,13 @@
 service: nmwdistvalidation
 runtime: python39
 instance_class: F4
+entrypoint: gunicorn -w 4 -k uvicorn.workers.UvicornWorker main:app
 
-handlers:
-  - url: /favicon\.ico
-    static_files: favicon.ico
-    upload: favicon\.ico
 
-  - url: .*
-    script: main.app
+#handlers:
+#  - url: /favicon\.ico
+#    static_files: favicon.ico
+#    upload: favicon\.ico
+#
+#  - url: .*
+#    script: main.app

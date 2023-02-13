@@ -13,14 +13,31 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ===============================================================================
-
+import uvicorn as uvicorn
+from fastapi import FastAPI
+from starlette.middleware.wsgi import WSGIMiddleware
+from starlette.responses import JSONResponse
 
 from callbacks import dash_app
 from layout import do_layout
+from validation import validate_locations
+
 do_layout()
-app = dash_app.server
+
+app = FastAPI()
+
+
+app.mount("/app", WSGIMiddleware(dash_app.server))
+
+
+@app.get('/validate_locations')
+def get_validate_locations(url: str, n: int = 10):
+    obj = validate_locations(url, n)
+    return JSONResponse(content=obj)
 
 
 if __name__ == "__main__":
-    dash_app.run_server(debug=True, port=8051)
+    uvicorn.run(app, port=8000)
+    # dash_app.run_server(debug=True, port=8051)
+
 # ============= EOF =============================================

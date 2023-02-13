@@ -10,3 +10,9 @@ jsonschema
 pysta
 # celery
 # redis
+
+# fastapi
+
+fastapi
+uvicorn
+gunicorn
