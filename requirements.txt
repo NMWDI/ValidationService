@@ -6,13 +6,7 @@ dash_renderjson
 requests
 pyshp
 jsonschema
-#flask_caching
 pysta
-# celery
-# redis
-
-# fastapi
-
 fastapi
 uvicorn
 gunicorn

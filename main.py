@@ -20,19 +20,24 @@ from starlette.responses import JSONResponse
 
 from callbacks import dash_app
 from layout import do_layout
-from validation import validate_locations
+from validation import validate_locations, validate_location
 
 do_layout()
 
 app = FastAPI()
 
-
 app.mount("/app", WSGIMiddleware(dash_app.server))
 
 
 @app.get('/validate_locations')
-def get_validate_locations(url: str, n: int = 10):
+async def get_validate_locations(url: str, n: int = 10):
     obj = validate_locations(url, n)
+    return JSONResponse(content=obj)
+
+
+@app.get('/validate_location')
+async def get_validate_location(url: str):
+    obj = validate_location(url)
     return JSONResponse(content=obj)
 
 
