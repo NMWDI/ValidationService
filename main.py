@@ -40,6 +40,10 @@ async def get_validate_location(url: str):
     obj = validate_location(url)
     return JSONResponse(content=obj)
 
+@app.get('/validate_thing')
+async def get_validate_thing(url: str):
+    obj = validate_thing(url)
+    return JSONResponse(content=obj)
 
 if __name__ == "__main__":
     uvicorn.run(app, port=8000)

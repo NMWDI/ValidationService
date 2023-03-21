@@ -108,6 +108,10 @@ def validate_location(base_url):
     return _validate_location(base_url)
 
 
+def validate_thing(base_url):
+    return _validate_thing(base_url)
+
+
 def _validate_location(base_url, url=None, n=0):
     global LOCATION_SCHEMA
     if LOCATION_SCHEMA is None:
@@ -124,14 +128,25 @@ def _validate_location(base_url, url=None, n=0):
     return _validate(vurl, LOCATION_SCHEMA)
 
 
-def validate_things(url):
+def validate_things(base_url, n=10):
+    return _validate_thing(base_url, 'Things', n=n)
+
+
+def _validate_thing(base_url, url=None, n=0):
     global THING_SCHEMA
     if THING_SCHEMA is None:
         resp = requests.get(
             'https://raw.githubusercontent.com/NMWDI/VocabService/main/schemas/groundwaterlevel.thing.schema.json#')
         THING_SCHEMA = resp.json()
 
-    return _validate(url, 'Things', THING_SCHEMA)
+    if n:
+        url = f'{url}?$top={n}'
+
+    vurl = base_url
+    if url:
+        vurl = f'{base_url}/{url}'
+
+    return _validate(vurl, THING_SCHEMA)
 
 
 def st_get(url):
