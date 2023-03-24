@@ -16,23 +16,34 @@
 from dash import Output, Input, State, ctx
 
 from dashapp import dash_app
-from validation import validate_locations
+from validation import validate_locations, validate_things, validate_datastreams
 
 
 @dash_app.callback([Output('validation_results', 'data'),
                     Output("loading-output-1", "children")],
                    [Input('validate_locations_btn', 'n_clicks'),
+                    Input('validate_things_btn', 'n_clicks'),
+                    Input('validate_datastreams_btn', 'n_clicks'),
                     Input('validate_all_btn', 'n_clicks'),
                     State('url_to_validate', 'value'),
+                    State("n", "value")
                     ],
                    prevent_initial_call=True
                    )
-def handle_validate(vlocations, vall, url):
+def handle_validate(vlocations, vthings, vds, vall, url, n):
     validation_results = []
+    func = None
     if ctx.triggered_id == 'validate_all_btn':
         pass
     elif ctx.triggered_id == 'validate_locations_btn':
-        validation_results = validate_locations(url)
+        func = validate_locations
+    elif ctx.triggered_id == 'validate_things_btn':
+        func = validate_things
+    elif ctx.triggered_id == 'validate_datastreams_btn':
+        func = validate_datastreams
+
+    if func:
+        validation_results = func(url, n)
 
     return validation_results, ''
 # ============= EOF =============================================

@@ -14,12 +14,9 @@
 # limitations under the License.
 # ===============================================================================
 import dash_bootstrap_components as dbc
-import dash_renderjson
-import pandas as pd
 import requests as requests
-from dash import html, Input, Output, State, dcc, ctx
+from dash import html, dcc
 from dash.dash_table import DataTable
-import plotly.graph_objects as go
 from dashapp import dash_app
 
 
@@ -32,8 +29,14 @@ def layout_rows():
     )
 
     validate_locations_btn = dbc.Button('Validate Locations', id='validate_locations_btn')
+    validate_things_btn = dbc.Button('Validate Things', id='validate_things_btn')
+    validate_datastreams_btn = dbc.Button('Validate Datastreams', id='validate_datastreams_btn')
     validate_all_btn = dbc.Button('Validate All', id='validate_all_btn')
-    validate_btn_grp = dbc.ButtonGroup([validate_all_btn, validate_locations_btn])
+    validate_btn_grp = dbc.ButtonGroup([validate_all_btn,
+                                        validate_locations_btn,
+                                        validate_things_btn,
+                                        validate_datastreams_btn
+                                        ])
     cols = [{"name": "Name", "id": "name"},
             {"name": "@iot.id", "id": "@iot.id"},
             {"name": "ValidationError", "id": "validation_error"},
@@ -55,11 +58,14 @@ def layout_rows():
         style_data={"fontSize": "10px", "font-family": "verdana",
                     # 'whiteSpace': 'pre-line'
                     },
-        style_table={"height": f"400px", "overflowY": "auto"},
+        style_table={"height": "600px", "overflowY": "auto"},
     )
 
-    return [dbc.Row(dbc.Col([dbc.Input(id='url_to_validate',
-                                       value='https://st2.newmexicowaterdata.org/FROST-Server/v1.1')])),
+    return [dbc.Row([dbc.Col([dbc.Input(id='url_to_validate',
+                                       value='https://st2.newmexicowaterdata.org/FROST-Server/v1.1')]),
+                    dbc.Col([dbc.Input(id='n', value=10)])
+                    ]
+                    ),
             dbc.Row(dbc.Col([validate_btn_grp])),
             dbc.Row(dbc.Col([dt, loading]))
             ]

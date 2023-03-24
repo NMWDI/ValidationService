@@ -20,7 +20,7 @@ from starlette.responses import JSONResponse
 
 from callbacks import dash_app
 from layout import do_layout
-from validation import validate_locations, validate_location
+from validation import validate_locations, validate_location, validate_thing
 
 do_layout()
 
@@ -40,10 +40,12 @@ async def get_validate_location(url: str):
     obj = validate_location(url)
     return JSONResponse(content=obj)
 
+
 @app.get('/validate_thing')
 async def get_validate_thing(url: str):
     obj = validate_thing(url)
     return JSONResponse(content=obj)
+
 
 if __name__ == "__main__":
     uvicorn.run(app, port=8000)

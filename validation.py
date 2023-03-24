@@ -132,6 +132,14 @@ def validate_things(base_url, n=10):
     return _validate_thing(base_url, 'Things', n=n)
 
 
+def validate_datastreams(base_url, n=10):
+    return _validate_datastream(base_url, 'Datastreams', n=n)
+
+
+def _validate_datastream(base_url, url=None, n=0):
+    pass
+
+
 def _validate_thing(base_url, url=None, n=0):
     global THING_SCHEMA
     if THING_SCHEMA is None:
