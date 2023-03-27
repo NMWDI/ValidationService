@@ -28,30 +28,75 @@ if os.environ.get('USE_LOCAL_SCHEMA', False):
         LOCATION_SCHEMA = json.load(fp)
     with open('schemas/things.json') as fp:
         THING_SCHEMA = json.load(fp)
+else:
+    resp = requests.get('https://raw.githubusercontent.com/NMWDI/VocabService/main/schemas/location.schema.json#')
+    LOCATION_SCHEMA = resp.json()
+
+    resp = requests.get(
+        'https://raw.githubusercontent.com/NMWDI/VocabService/main/schemas/groundwaterlevel.thing.schema.json#')
+    THING_SCHEMA = resp.json()
+
+    resp = requests.get(
+        'https://raw.githubusercontent.com/NMWDI/VocabService/main/schemas/groundwaterlevel.datastream.schema.json#')
+    DATASTREAM_SCHEMA = resp.json()
+
+    resp = requests.get(
+        'https://raw.githubusercontent.com/NMWDI/VocabService/main/schemas/groundwaterlevel.sensor.schema.json#')
+    SENSOR_SCHEMA = resp.json()
 
 
+# Locations
 def validate_locations(base_url, n=10):
     return _validate_location(base_url, n)
-
-
-def validate_things(base_url, n=10):
-    return _validate_thing(base_url, n)
 
 
 def validate_location(base_url):
     return _validate_location(base_url)
 
 
+# ===============================================================================
+
+# Things
+def validate_things(base_url, n=10):
+    return _validate_thing(base_url, n)
+
+
 def validate_thing(base_url):
     return _validate_thing(base_url)
 
 
-def _validate_location(base_url, n=0):
-    global LOCATION_SCHEMA
-    if LOCATION_SCHEMA is None:
-        resp = requests.get('https://raw.githubusercontent.com/NMWDI/VocabService/main/schemas/location.schema.json#')
-        LOCATION_SCHEMA = resp.json()
+# ===============================================================================
 
+# Datastreams
+def validate_datastreams(base_url, n=10):
+    return _validate_datastream(base_url, n=n)
+
+
+def validate_datastream(base_url):
+    return _validate_datastream(base_url)
+
+
+# ===============================================================================
+
+# Sensors
+def validate_sensors(base_url, n=10):
+    return _validate_sensor(base_url, n=n)
+
+
+def validate_sensor(base_url):
+    return _validate_sensor(base_url)
+
+
+# ===============================================================================
+def _validate_sensor(base_url, n=0):
+    params = None
+    if n:
+        params = {'$top': n}
+    base_url = f'{base_url}/Sensors'
+    return _validate(base_url, SENSOR_SCHEMA, params=params)
+
+
+def _validate_location(base_url, n=0):
     params = None
     if n:
         params = {'$top': n}
@@ -59,21 +104,7 @@ def _validate_location(base_url, n=0):
     return _validate(base_url, LOCATION_SCHEMA, params=params)
 
 
-def validate_things(base_url, n=10):
-    return _validate_thing(base_url, n=n)
-
-
-def validate_datastreams(base_url, n=10):
-    return _validate_datastream(base_url, 'Datastreams', n=n)
-
-
 def _validate_datastream(base_url, n=0):
-    global DATASTREAM_SCHEMA
-    if DATASTREAM_SCHEMA is None:
-        resp = requests.get(
-            'https://raw.githubusercontent.com/NMWDI/VocabService/main/schemas/groundwaterlevel.datastream.schema.json#')
-        DATASTREAM_SCHEMA = resp.json()
-
     params = None
     if n:
         params = {'$top': n}
@@ -82,26 +113,11 @@ def _validate_datastream(base_url, n=0):
 
 
 def _validate_thing(base_url, n=0):
-    global THING_SCHEMA
-    if THING_SCHEMA is None:
-        resp = requests.get(
-            'https://raw.githubusercontent.com/NMWDI/VocabService/main/schemas/groundwaterlevel.thing.schema.json#')
-        THING_SCHEMA = resp.json()
-
     params = None
     if n:
         params = {'$top': n}
 
     return _validate(base_url, THING_SCHEMA, params=params)
-
-
-# def st_get(url, params=None):
-#     resp = requests.get(url, params=params)
-#     if resp.status_code == 200:
-#         return resp.json()
-#     else:
-#         print(url)
-#         print(resp.status_code, resp.text)
 
 
 # define a function that recursively retrieves all the items from a request
@@ -144,48 +160,5 @@ def _validate(base_url, schema, params):
 '''}
                             )
     return failures
-
-# def st2_validation(url):
-#     global LOCATION_SCHEMA, THING_SCHEMA, DATASTREAM_SCHEMA
-#
-#     if LOCATION_SCHEMA is None:
-#         resp = requests.get('https://raw.githubusercontent.com/NMWDI/VocabService/main/schemas/location.schema.json#')
-#         LOCATION_SCHEMA = resp.json()
-#
-#     if THING_SCHEMA is None:
-#         resp = requests.get(
-#             'https://raw.githubusercontent.com/NMWDI/VocabService/main/schemas/groundwaterlevel.thing.schema.json#')
-#         THING_SCHEMA = resp.json()
-#
-#     if DATASTREAM_SCHEMA is None:
-#         resp = requests.get(
-#             'https://raw.githubusercontent.com/NMWDI/VocabService/main/schemas/groundwaterlevel.datastream.schema.json#'
-#         )
-#         DATASTREAM_SCHEMA = resp.json()
-#
-#     flocations = []
-#     fthings = []
-#     fdatastreams = []
-#     for agency in ('NMBGMR', 'EBID'):
-#         locations = st_get(url, f"Locations?$top=10&$filter=properties/agency eq '{agency}'&$expand=Things/Datastreams")
-#         for location in locations['value']:
-#             try:
-#                 validate(location, LOCATION_SCHEMA)
-#             except ValidationError as e:
-#                 flocations.append(e)
-#
-#             for thing in location['Things']:
-#                 try:
-#                     validate(thing, THING_SCHEMA)
-#                 except ValidationError as e:
-#                     fthings.append(e)
-#
-#                 for datastream in thing['Datastreams']:
-#                     try:
-#                         validate(datastream, DATASTREAM_SCHEMA)
-#                     except ValidationError as e:
-#                         fdatastreams.append(e)
-#
-#     return flocations, fthings, fdatastreams
 
 # ============= EOF =============================================
