@@ -1,0 +1,40 @@
+{
+  "$id": "https://vocab.newmexicowaterdata.org/schemas/gwl_thing",
+  "title": "NMWDI Groundwater Level Thing Schema",
+  "description": "",
+  "version": "0.0.1",
+  "type": "object",
+  "required": ["name", "description", "properties"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "name of a Thing for groundwater levels should be `Water Well`"
+    },
+    "description": {
+      "type": "string",
+      "description": "description of this location"
+    },
+    "properties": {
+      "type": "object",
+      "description": "a flexible place to associate additional attributes with a thing",
+      "required": ["welldepth", "welldepth_unit", "geologic_formation"],
+      "welldepth": {
+        "type": "number",
+        "description": ""
+      },
+      "welldepth_unit": {
+        "type": "string",
+        "enum": [
+          "FTBGS",
+          "MBGS"
+        ],
+        "description": ""
+      },
+      "geologic_formation":
+      {
+        "type": "string",
+        "description": ""
+      }
+    }
+  }
+}

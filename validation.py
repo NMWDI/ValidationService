@@ -14,6 +14,7 @@
 # limitations under the License.
 # ===============================================================================
 import json
+import os
 
 import requests
 from dash import dcc
@@ -21,87 +22,20 @@ from jsonschema import validate, ValidationError
 
 LOCATION_SCHEMA = None
 THING_SCHEMA = None
-THING_SCHEMA = {
-    "$id": "https://vocab.newmexicowaterdata.org/schemas/gwl_thing",
-    "title": "NMWDI Groundwater Level Thing Schema",
-    "description": "",
-    "version": "0.0.1",
-    "type": "object",
-    "required": ["name", "description", "properties"],
-    "properties": {
-        "name": {
-            "type": "string",
-            "description": "name of a Thing for groundwater levels should be `Water Well`"
-        },
-        "description": {
-            "type": "string",
-            "description": "description of this location"
-        },
-        "properties": {
-            "type": "object",
-            "description": "a flexible place to associate additional attributes with a thing",
-            "required": ["welldepth", "welldepth_unit", "geologic_formation"],
-            "welldepth": {
-                "type": "number",
-                "description": ""
-            },
-            "welldepth_unit": {
-                "type": "string",
-                "enum": [
-                    "FTBGS",
-                    "MBGS"
-                ],
-                "description": ""
-            },
-            "geologic_formation":
-                {
-                    "type": "string",
-                    "description": ""
-                }
-        }
-    }
-}
 
-DATASTREAM_SCHEMA = {
-    "$id": "https://vocab.newmexicowaterdata.org/schemas/gwl_thing",
-    "title": "NMWDI Groundwater Level Thing Schema",
-    "description": "",
-    "version": "0.0.1",
-    "type": "object",
-    "required": ["name", "description", "properties"],
-    "properties": {
-        "name": {
-            "type": "string",
-            "description": "name for Groundwater levels",
-            "enum": ["Groundwater Levels", "Groundwater Levels(Acoustic)", "Groundwater Levels(Pressure)"]
-        },
-        "description": {
-            "type": "string",
-            "description": "description of this location"
-        },
-        "properties": {
-            "required": ["topic"],
-            "type": "object",
-            "description": "a flexible place to associate additional attributes with a thing",
-            "topic": {"type": "string",
-                      "enum": ["Water Quantity"]}
-        }
-    }
-}
-
-
-# @app.get('/st2_validate')
-# async def get_st2_validation():
-#     return st2_validation(ST2)
-#
-# @app.get('/st_validate_location')
-# async def get_st_validate_location(url: str):
-#     return validate_locations(url)
+if os.environ.get('USE_LOCAL_SCHEMA', True):
+    with open('schemas/locations.json') as fp:
+        LOCATION_SCHEMA = json.load(fp)
+    with open('schemas/things.json') as fp:
+        THING_SCHEMA = json.load(fp)
 
 
 def validate_locations(base_url, n=10):
-    url = 'Locations'
-    return _validate_location(base_url, url, n)
+    return _validate_location(base_url, n)
+
+
+def validate_things(base_url, n=10):
+    return _validate_thing(base_url, n)
 
 
 def validate_location(base_url):
@@ -112,63 +46,87 @@ def validate_thing(base_url):
     return _validate_thing(base_url)
 
 
-def _validate_location(base_url, url=None, n=0):
+def _validate_location(base_url, n=0):
     global LOCATION_SCHEMA
     if LOCATION_SCHEMA is None:
         resp = requests.get('https://raw.githubusercontent.com/NMWDI/VocabService/main/schemas/location.schema.json#')
         LOCATION_SCHEMA = resp.json()
 
+    params = None
     if n:
-        url = f'{url}?$top={n}'
-
-    vurl = base_url
-    if url:
-        vurl = f'{base_url}/{url}'
-
-    return _validate(vurl, LOCATION_SCHEMA)
+        params = {'$top': n}
+    base_url = f'{base_url}/Locations'
+    return _validate(base_url, LOCATION_SCHEMA, params=params)
 
 
 def validate_things(base_url, n=10):
-    return _validate_thing(base_url, 'Things', n=n)
+    return _validate_thing(base_url, n=n)
 
 
 def validate_datastreams(base_url, n=10):
     return _validate_datastream(base_url, 'Datastreams', n=n)
 
 
-def _validate_datastream(base_url, url=None, n=0):
-    pass
+def _validate_datastream(base_url, n=0):
+    global DATASTREAM_SCHEMA
+    if DATASTREAM_SCHEMA is None:
+        resp = requests.get(
+            'https://raw.githubusercontent.com/NMWDI/VocabService/main/schemas/groundwaterlevel.datastream.schema.json#')
+        DATASTREAM_SCHEMA = resp.json()
+
+    params = None
+    if n:
+        params = {'$top': n}
+    base_url = f'{base_url}/Datastreams'
+    return _validate(base_url, DATASTREAM_SCHEMA, params=params)
 
 
-def _validate_thing(base_url, url=None, n=0):
+def _validate_thing(base_url, n=0):
     global THING_SCHEMA
     if THING_SCHEMA is None:
         resp = requests.get(
             'https://raw.githubusercontent.com/NMWDI/VocabService/main/schemas/groundwaterlevel.thing.schema.json#')
         THING_SCHEMA = resp.json()
 
+    params = None
     if n:
-        url = f'{url}?$top={n}'
+        params = {'$top': n}
 
-    vurl = base_url
-    if url:
-        vurl = f'{base_url}/{url}'
-
-    return _validate(vurl, THING_SCHEMA)
+    return _validate(base_url, THING_SCHEMA, params=params)
 
 
-def st_get(url):
-    resp = requests.get(url)
+# def st_get(url, params=None):
+#     resp = requests.get(url, params=params)
+#     if resp.status_code == 200:
+#         return resp.json()
+#     else:
+#         print(url)
+#         print(resp.status_code, resp.text)
+
+
+# define a function that recursively retrieves all the items from a request
+def st_get_all(url, params=None, page=0, max_pages=1, max_items=1000):
+    if page >= max_pages:
+        return []
+    print(url, params)
+    resp = requests.get(url, params=params)
     if resp.status_code == 200:
-        return resp.json()
+        items = resp.json()
+        if 'value' in items:
+            items = items['value']
+        if '@iot.nextLink' in items:
+            if len(max_items) <= max_items:
+                items.extend(
+                    st_get_all(items['@iot.nextLink'], page=page + 1, max_pages=max_pages, max_items=max_items))
+        return items
     else:
         print(url)
         print(resp.status_code, resp.text)
 
 
-def _validate(base_url, schema):
+def _validate(base_url, schema, params):
     failures = []
-    items = st_get(base_url)
+    items = st_get_all(base_url, params=params)
     if 'value' not in items:
         items = {'value': [items]}
 
@@ -187,48 +145,47 @@ def _validate(base_url, schema):
                             )
     return failures
 
-
-def st2_validation(url):
-    global LOCATION_SCHEMA, THING_SCHEMA, DATASTREAM_SCHEMA
-
-    if LOCATION_SCHEMA is None:
-        resp = requests.get('https://raw.githubusercontent.com/NMWDI/VocabService/main/schemas/location.schema.json#')
-        LOCATION_SCHEMA = resp.json()
-
-    if THING_SCHEMA is None:
-        resp = requests.get(
-            'https://raw.githubusercontent.com/NMWDI/VocabService/main/schemas/groundwaterlevel.thing.schema.json#')
-        THING_SCHEMA = resp.json()
-
-    if DATASTREAM_SCHEMA is None:
-        resp = requests.get(
-            'https://raw.githubusercontent.com/NMWDI/VocabService/main/schemas/groundwaterlevel.datastream.schema.json#'
-        )
-        DATASTREAM_SCHEMA = resp.json()
-
-    flocations = []
-    fthings = []
-    fdatastreams = []
-    for agency in ('NMBGMR', 'EBID'):
-        locations = st_get(url, f"Locations?$top=10&$filter=properties/agency eq '{agency}'&$expand=Things/Datastreams")
-        for location in locations['value']:
-            try:
-                validate(location, LOCATION_SCHEMA)
-            except ValidationError as e:
-                flocations.append(e)
-
-            for thing in location['Things']:
-                try:
-                    validate(thing, THING_SCHEMA)
-                except ValidationError as e:
-                    fthings.append(e)
-
-                for datastream in thing['Datastreams']:
-                    try:
-                        validate(datastream, DATASTREAM_SCHEMA)
-                    except ValidationError as e:
-                        fdatastreams.append(e)
-
-    return flocations, fthings, fdatastreams
+# def st2_validation(url):
+#     global LOCATION_SCHEMA, THING_SCHEMA, DATASTREAM_SCHEMA
+#
+#     if LOCATION_SCHEMA is None:
+#         resp = requests.get('https://raw.githubusercontent.com/NMWDI/VocabService/main/schemas/location.schema.json#')
+#         LOCATION_SCHEMA = resp.json()
+#
+#     if THING_SCHEMA is None:
+#         resp = requests.get(
+#             'https://raw.githubusercontent.com/NMWDI/VocabService/main/schemas/groundwaterlevel.thing.schema.json#')
+#         THING_SCHEMA = resp.json()
+#
+#     if DATASTREAM_SCHEMA is None:
+#         resp = requests.get(
+#             'https://raw.githubusercontent.com/NMWDI/VocabService/main/schemas/groundwaterlevel.datastream.schema.json#'
+#         )
+#         DATASTREAM_SCHEMA = resp.json()
+#
+#     flocations = []
+#     fthings = []
+#     fdatastreams = []
+#     for agency in ('NMBGMR', 'EBID'):
+#         locations = st_get(url, f"Locations?$top=10&$filter=properties/agency eq '{agency}'&$expand=Things/Datastreams")
+#         for location in locations['value']:
+#             try:
+#                 validate(location, LOCATION_SCHEMA)
+#             except ValidationError as e:
+#                 flocations.append(e)
+#
+#             for thing in location['Things']:
+#                 try:
+#                     validate(thing, THING_SCHEMA)
+#                 except ValidationError as e:
+#                     fthings.append(e)
+#
+#                 for datastream in thing['Datastreams']:
+#                     try:
+#                         validate(datastream, DATASTREAM_SCHEMA)
+#                     except ValidationError as e:
+#                         fdatastreams.append(e)
+#
+#     return flocations, fthings, fdatastreams
 
 # ============= EOF =============================================
