@@ -29,19 +29,19 @@ if os.environ.get('USE_LOCAL_SCHEMA', False):
     with open('schemas/things.json') as fp:
         THING_SCHEMA = json.load(fp)
 else:
-    resp = requests.get('https://raw.githubusercontent.com/NMWDI/VocabService/main/schemas/location.schema.json#')
+    resp = requests.get('https://raw.githubusercontent.com/NMWDI/VocabService/main/schemas/v0/locations.json#')
     LOCATION_SCHEMA = resp.json()
 
     resp = requests.get(
-        'https://raw.githubusercontent.com/NMWDI/VocabService/main/schemas/groundwaterlevel.thing.schema.json#')
+        'https://raw.githubusercontent.com/NMWDI/VocabService/main/schemas/v0/groundwaterlevel.thing.json#')
     THING_SCHEMA = resp.json()
 
     resp = requests.get(
-        'https://raw.githubusercontent.com/NMWDI/VocabService/main/schemas/groundwaterlevel.datastream.schema.json#')
+        'https://raw.githubusercontent.com/NMWDI/VocabService/main/schemas/v0/groundwaterlevel.datastream.json#')
     DATASTREAM_SCHEMA = resp.json()
 
     resp = requests.get(
-        'https://raw.githubusercontent.com/NMWDI/VocabService/main/schemas/groundwaterlevel.sensor.schema.json#')
+        'https://raw.githubusercontent.com/NMWDI/VocabService/main/schemas/v0/groundwaterlevel.sensor.json#')
     SENSOR_SCHEMA = resp.json()
 
 
