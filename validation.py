@@ -33,15 +33,15 @@ else:
     LOCATION_SCHEMA = resp.json()
 
     resp = requests.get(
-        'https://raw.githubusercontent.com/NMWDI/VocabService/main/schemas/v0/groundwaterlevel.thing.json#')
+        'https://raw.githubusercontent.com/NMWDI/VocabService/main/schemas/v0/groundwaterlevel.things.json#')
     THING_SCHEMA = resp.json()
 
     resp = requests.get(
-        'https://raw.githubusercontent.com/NMWDI/VocabService/main/schemas/v0/groundwaterlevel.datastream.json#')
+        'https://raw.githubusercontent.com/NMWDI/VocabService/main/schemas/v0/groundwaterlevel.datastreams.json#')
     DATASTREAM_SCHEMA = resp.json()
 
     resp = requests.get(
-        'https://raw.githubusercontent.com/NMWDI/VocabService/main/schemas/v0/groundwaterlevel.sensor.json#')
+        'https://raw.githubusercontent.com/NMWDI/VocabService/main/schemas/v0/groundwaterlevel.sensors.json#')
     SENSOR_SCHEMA = resp.json()
 
 
