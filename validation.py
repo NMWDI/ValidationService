@@ -23,7 +23,7 @@ from jsonschema import validate, ValidationError
 LOCATION_SCHEMA = None
 THING_SCHEMA = None
 
-if os.environ.get('USE_LOCAL_SCHEMA', True):
+if os.environ.get('USE_LOCAL_SCHEMA', False):
     with open('schemas/locations.json') as fp:
         LOCATION_SCHEMA = json.load(fp)
     with open('schemas/things.json') as fp:
