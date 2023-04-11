@@ -12,9 +12,7 @@ on:
 jobs:
   build:
     name:  Validation Service unittests (${{ matrix.python-version }}, ${{ matrix.os }})
-    strategy:
-      matrix:
-        os: [ ubuntu-latest]
+    runs-on: [ ubuntu-latest ]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
