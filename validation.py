@@ -47,6 +47,7 @@ else:
 
 # Locations
 def validate_locations(base_url, n=10):
+    base_url = f'{base_url}/Locations'
     return _validate_location(base_url, n)
 
 
@@ -58,6 +59,7 @@ def validate_location(base_url):
 
 # Things
 def validate_things(base_url, n=10):
+    base_url = f'{base_url}/Things'
     return _validate_thing(base_url, n)
 
 
@@ -69,6 +71,7 @@ def validate_thing(base_url):
 
 # Datastreams
 def validate_datastreams(base_url, n=10):
+    base_url = f'{base_url}/Datastreams'
     return _validate_datastream(base_url, n=n)
 
 
@@ -100,7 +103,6 @@ def _validate_location(base_url, n=0):
     params = None
     if n:
         params = {'$top': n}
-    base_url = f'{base_url}/Locations'
     return _validate(base_url, LOCATION_SCHEMA, params=params)
 
 
@@ -124,16 +126,19 @@ def _validate_thing(base_url, n=0):
 def st_get_all(url, params=None, page=0, max_pages=1, max_items=1000):
     if page >= max_pages:
         return []
-    print(url, params)
+    # print(url, params)
     resp = requests.get(url, params=params)
     if resp.status_code == 200:
-        items = resp.json()
+        items = respobj = resp.json()
+        # print('got items', items)
         if 'value' in items:
             items = items['value']
-        if '@iot.nextLink' in items:
-            if len(max_items) <= max_items:
+
+        if '@iot.nextLink' in respobj:
+            if len(items) <= max_items and page < max_pages:
                 items.extend(
-                    st_get_all(items['@iot.nextLink'], page=page + 1, max_pages=max_pages, max_items=max_items))
+                    st_get_all(respobj['@iot.nextLink'], page=page + 1, max_pages=max_pages, max_items=max_items))
+
         return items
     else:
         print(url)
@@ -143,10 +148,10 @@ def st_get_all(url, params=None, page=0, max_pages=1, max_items=1000):
 def _validate(base_url, schema, params):
     failures = []
     items = st_get_all(base_url, params=params)
-    if 'value' not in items:
-        items = {'value': [items]}
+    if isinstance(items, dict):
+        items = [items]
 
-    for item in items['value']:
+    for item in items:
         try:
             validate(item, schema)
         except ValidationError as e:
