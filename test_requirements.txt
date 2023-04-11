@@ -1,0 +1,14 @@
+dash==2.8.0
+plotly
+pandas
+dash_bootstrap_components
+dash_renderjson
+requests
+pyshp
+jsonschema
+pysta
+fastapi
+uvicorn
+gunicorn
+httpx
+pytest
