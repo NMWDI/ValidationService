@@ -10,9 +10,13 @@ on:
 #    branches: [ dev/dc, dev/dr , hot/dr, hot/dc]
 
 jobs:
-  build:
+  test:
     name:  Validation Service unittests (${{ matrix.python-version }}, ${{ matrix.os }})
     runs-on: [ ubuntu-latest ]
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, macos-latest, windows-latest]
+        python-version: [ '3.8', '3.9', '3.10' ]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -20,7 +24,7 @@ jobs:
           ref: ${{ github.head_ref }}
       - uses: actions/setup-python@v4
         with:
-          python-version: '3.8'
+          python-version: ${{ matrix.python-version }}
       - name: Setup testing environment
         run: >
           pip install -r test_requirements.txt
