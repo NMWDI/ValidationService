@@ -14,17 +14,18 @@ jobs:
     name:  Validation Service unittests (${{ matrix.python-version }}, ${{ matrix.os }})
     strategy:
       matrix:
-        os: [ macos-latest]
-    runs-on: ${{ matrix.os }}
+        os: [ ubuntu-latest]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
         with:
           ref: ${{ github.head_ref }}
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.8'
       - name: Setup testing environment
         run: >
           pip install -r test_requirements.txt
-
       - name: Test with unittest
         run: |
           pytest tests.py
