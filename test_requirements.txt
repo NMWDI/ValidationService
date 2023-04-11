@@ -1,4 +1,4 @@
-dash==2.8.0
+dash>=2.8.0,<2.9.0
 plotly
 pandas
 dash_bootstrap_components
