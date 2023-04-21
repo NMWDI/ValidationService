@@ -44,6 +44,7 @@ else:
         'https://raw.githubusercontent.com/NMWDI/VocabService/main/schemas/v0/groundwaterlevel.sensors.json#')
     SENSOR_SCHEMA = resp.json()
 
+
 # validate multiples
 
 # Locations
@@ -51,9 +52,11 @@ def validate_locations(base_url, n=10):
     base_url = f'{base_url}/Locations'
     return _validate_location(base_url, n)
 
+
 def validate_things(base_url, n=10):
     base_url = f'{base_url}/Things'
     return _validate_thing(base_url, n)
+
 
 def validate_datastreams(base_url, n=10):
     base_url = f'{base_url}/Datastreams'
@@ -69,6 +72,8 @@ def validate_sensors(base_url, n=10):
 # validate singles
 def validate_location(base_url):
     return _validate_location(base_url)
+
+
 
 def validate_thing(base_url):
     return _validate_thing(base_url)
@@ -122,6 +127,7 @@ def st_get_all(url, params=None, page=0, max_pages=1, max_items=1000):
         print(url)
         print(resp.status_code, resp.text)
 
+
 class URLError(BaseException):
     def __init__(self, url):
         self.url = url
@@ -132,12 +138,12 @@ class URLError(BaseException):
 
 def _validate(base_url, schema, params=None, n=10):
     if params is None:
-        params={}
+        params = {}
 
     if n is not None:
         params['$top'] = n
 
-    failures = []
+    responses = []
     items = st_get_all(base_url, params=params)
     if isinstance(items, dict):
         items = [items]
@@ -146,19 +152,18 @@ def _validate(base_url, schema, params=None, n=10):
         if '@iot.id' not in item:
             raise URLError(base_url)
 
+        response = {'name': item['name'], '@iot.id': item['@iot.id']}
         try:
             validate(item, schema)
+            response['validation_error'] = ''
+            response['instance'] = ''
+
         except ValidationError as e:
             instance = json.dumps(e.instance, indent=2)
             print(item)
-            failures.append({'name': item['name'], '@iot.id': item['@iot.id'],
-                             'validation_error': e.message,
-                             'instance': f'''
-```json
-{instance}
-```
-'''}
-                            )
-    return failures
+            response['validation_error'] = e.message
+            response['instance'] = f'```json\n{instance}\n```\n'
+        responses.append(response)
+    return responses
 
 # ============= EOF =============================================

@@ -17,6 +17,20 @@ def test_validate_locations():
     # assert response.json() == {"msg": "Hello World"}
 
 
+def test_validate_n_locations():
+    response = client.get("/validate_locations", params={"url": TEST_URL, "n": 3})
+    assert response.status_code == 200
+    assert isinstance(response.json(), list)
+    assert len(response.json()) == 3
+
+
+def validate_n_things():
+    response = client.get("/validate_things", params={"url": TEST_URL, "n": 3})
+    assert response.status_code == 200
+    assert isinstance(response.json(), list)
+    assert len(response.json()) == 3
+
+
 def test_validate_location():
     response = client.get("/validate_location", params={"url": f'{TEST_URL}/Locations(1)'})
     assert response.status_code == 200
@@ -28,7 +42,6 @@ def test_validate_location_bad_url():
     response = client.get("/validate_location", params={"url": TEST_URL})
     assert response.status_code == 200
     assert response.json() == {"error": f"invalid url: {TEST_URL}"}
-
 
 
 def test_validate_things():
@@ -48,6 +61,8 @@ def test_validate_thing_bad_url():
     response = client.get("/validate_thing", params={"url": TEST_URL})
     assert response.status_code == 200
     assert response.json() == {"error": f"invalid url: {TEST_URL}"}
+
+
 #     assert response.json() == {"msg": "Hello World"}
 
 def test_validate_datastreams():
@@ -72,11 +87,13 @@ def test_validate_sensors():
     response = client.get("/validate_sensors", params={"url": TEST_URL})
     assert response.status_code == 200
 
+
 def test_validate_sensor():
     response = client.get("/validate_sensor", params={"url": f'{TEST_URL}/Sensors(1)'})
     assert response.status_code == 200
-    assert isinstance(response.json(), list)
-    assert len(response.json()) == 0
+    assert isinstance(response.json(),list)
+    assert len(response.json()) == 1
+
 
 def test_validate_sensor_bad_url():
     response = client.get("/validate_sensor", params={"url": TEST_URL})
